@@ -56,3 +56,9 @@ python bot_vk.py --debug=True
 
 После запуска вы получите примерно следующий результат:   
 ![bot_vk.gif](bot_vk.gif)
+
+### 3. Пробуем сами погонять
+
+Боты развернуты на тестовых стендах (спасибо [Heroku](https://dashboard.heroku.com/)):  
+- [Telegram бот](http://t.me/My_DVMN_lessons_bot)
+- [VK.com бот](https://vk.com/club207518020)
