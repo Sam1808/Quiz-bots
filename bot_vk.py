@@ -1,10 +1,11 @@
-import argparse
 import logging
 import os
 import random
 import redis
 import vk_api as vk
 
+from bot_utils import get_arguments
+from bot_utils import get_quiz_qa
 from dotenv import load_dotenv
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkLongPoll, VkEventType
@@ -66,14 +67,7 @@ def give_up(event, vk_api, quiz_qa, redis_base):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--debug',
-        type=bool,
-        default=False,
-        help='Turn DEBUG mode on'
-    )
-    arguments = parser.parse_args()
+    arguments = get_arguments()
     level = logging.DEBUG if arguments.debug else logging.INFO
     logging.basicConfig(level=level)
 
@@ -90,25 +84,10 @@ if __name__ == "__main__":
         password=redis_password
     )
 
-    qa_files = os.listdir('questions')
-    quiz_raw_data = []
-    logging.debug('Read questions and answers from files')
-    for qa_file in qa_files:
-        qa_file_path = os.path.join('questions', qa_file)
-
-        with open(qa_file_path, 'r', encoding='KOI8-R') as file:
-            quiz_raw_data += file.read().split('\n\n')
-
-    logging.debug('Make QA dictionary')
-    quiz_qa = {}
-    for paragraph in quiz_raw_data:
-        if 'Вопрос' in paragraph:
-            after_colon = paragraph.find(':')+1
-            question = paragraph[after_colon:].strip()
-        if 'Ответ' in paragraph:
-            after_colon = paragraph.find(':') + 1
-            answer = paragraph[after_colon:].strip()
-            quiz_qa[question] = answer
+    logging.debug(
+        'Read questions and answers from files & make QA dictionary'
+    )
+    quiz_qa = get_quiz_qa('questions')
 
     logging.debug('Run VK.com bot')
     vk_session = vk.VkApi(token=vk_token)

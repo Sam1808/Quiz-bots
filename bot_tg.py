@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 import random
@@ -8,6 +7,8 @@ import telegram
 from dotenv import load_dotenv
 from functools import partial
 
+from bot_utils import get_arguments
+from bot_utils import get_quiz_qa
 from enum import Enum
 from telegram.ext import ConversationHandler
 from telegram.ext import CommandHandler
@@ -66,14 +67,7 @@ def handle_give_up(update, context, quiz_qa, redis_base):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--debug',
-        type=bool,
-        default=False,
-        help='Turn DEBUG mode on'
-    )
-    arguments = parser.parse_args()
+    arguments = get_arguments()
     level = logging.DEBUG if arguments.debug else logging.INFO
     logging.basicConfig(level=level)
 
@@ -90,26 +84,10 @@ if __name__ == '__main__':
         password=redis_password
     )
 
-    qa_files = os.listdir('questions')
-    quiz_raw_data = []
-    logging.debug('Read questions and answers from files')
-    for qa_file in qa_files:
-        qa_file_path = os.path.join('questions', qa_file)
-
-        with open(qa_file_path, 'r', encoding='KOI8-R') as file:
-            quiz_raw_data += file.read().split('\n\n')
-
-    logging.debug('Make QA dictionary')
-    quiz_qa = {}
-    for paragraph in quiz_raw_data:
-        if 'Вопрос' in paragraph:
-            after_colon = paragraph.find(':')+1
-            question = paragraph[after_colon:].strip()
-        if 'Ответ' in paragraph:
-            after_colon = paragraph.find(':') + 1
-            answer = paragraph[after_colon:].strip()
-            quiz_qa[question] = answer
-
+    logging.debug(
+        'Read questions and answers from files & make QA dictionary'
+    )
+    quiz_qa = get_quiz_qa('questions')
     logging.debug('Prepare telegram bot')
     updater = Updater(token=telegram_token)
     dispatcher = updater.dispatcher
