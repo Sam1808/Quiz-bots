@@ -34,14 +34,14 @@ def send_keyboard(event, vk_api):
     )
 
 
-def send_new_question(event, vk_api, quiz_qa, redis_base):
+def send_new_question(event, vk_api, quiz_qa, redis_connection):
     question = random.choice([*quiz_qa])
-    redis_base.set(f'vk-{event.user_id}', question)
+    redis_connection.set(f'vk-{event.user_id}', question)
     send_message(event, vk_api, message=f'Вопрос: {question}')
 
 
-def check_answer(event, vk_api, quiz_qa, redis_base):
-    quiz_question = redis_base.get(f'vk-{event.user_id}')
+def check_answer(event, vk_api, quiz_qa, redis_connection):
+    quiz_question = redis_connection.get(f'vk-{event.user_id}')
     if quiz_question:
         quiz_question = quiz_question.decode('utf-8')
         message = 'Неправильно… Попробуешь ещё раз?'
@@ -57,13 +57,13 @@ def check_answer(event, vk_api, quiz_qa, redis_base):
         send_message(event, vk_api, message)
 
 
-def give_up(event, vk_api, quiz_qa, redis_base):
-    quiz_question = redis_base.get(f'vk-{event.user_id}')
+def give_up(event, vk_api, quiz_qa, redis_connection):
+    quiz_question = redis_connection.get(f'vk-{event.user_id}')
     if quiz_question:
         quiz_question = quiz_question.decode('utf-8')
         answer = f'Ответ: {quiz_qa[quiz_question]}'
         send_message(event, vk_api, answer)
-        send_new_question(event, vk_api, quiz_qa, redis_base)
+        send_new_question(event, vk_api, quiz_qa, redis_connection)
 
 
 if __name__ == "__main__":
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     redis_password = os.environ['REDIS-PASSWORD']
 
     logging.debug('Open Redis connection')
-    redis_base = redis.Redis(
+    redis_connection = redis.Redis(
         host=redis_host,
         port=redis_port,
         password=redis_password
@@ -99,8 +99,8 @@ if __name__ == "__main__":
             if event.text == 'start':
                 send_keyboard(event, vk_api)
             elif event.text == 'Новый вопрос':
-                send_new_question(event, vk_api, quiz_qa, redis_base)
+                send_new_question(event, vk_api, quiz_qa, redis_connection)
             elif event.text == 'Сдаться':
-                give_up(event, vk_api, quiz_qa, redis_base)
+                give_up(event, vk_api, quiz_qa, redis_connection)
             else:
-                check_answer(event, vk_api, quiz_qa, redis_base)
+                check_answer(event, vk_api, quiz_qa, redis_connection)

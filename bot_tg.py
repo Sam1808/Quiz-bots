@@ -37,15 +37,15 @@ def cancel(update, _):
     return ConversationHandler.END
 
 
-def handle_new_question_request(update, _, quiz_qa, redis_base):
+def handle_new_question_request(update, _, quiz_qa, redis_connection):
     question = random.choice([*quiz_qa])
-    redis_base.set(f"tg-{update.message.from_user['id']}", question)
+    redis_connection.set(f"tg-{update.message.from_user['id']}", question)
     update.message.reply_text(f'Вопрос: {question}')
     return QUIZ.Answer
 
 
-def handle_solution_attempt(update, _, quiz_qa, redis_base):
-    quiz_question = redis_base.get(
+def handle_solution_attempt(update, _, quiz_qa, redis_connection):
+    quiz_question = redis_connection.get(
         f"tg-{update.message.from_user['id']}"
     ).decode('utf-8')
     message = 'Неправильно… Попробуешь ещё раз?'
@@ -57,13 +57,13 @@ def handle_solution_attempt(update, _, quiz_qa, redis_base):
     update.message.reply_text(message)
 
 
-def handle_give_up(update, context, quiz_qa, redis_base):
-    quiz_question = redis_base.get(
+def handle_give_up(update, context, quiz_qa, redis_connection):
+    quiz_question = redis_connection.get(
         f"tg-{update.message.from_user['id']}"
     ).decode('utf-8')
     answer = f'Ответ: {quiz_qa[quiz_question]}'
     update.message.reply_text(answer)
-    handle_new_question_request(update, context, quiz_qa, redis_base)
+    handle_new_question_request(update, context, quiz_qa, redis_connection)
 
 
 if __name__ == '__main__':
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     redis_password = os.environ['REDIS-PASSWORD']
 
     logging.debug('Open Redis connection')
-    redis_base = redis.Redis(
+    redis_connection = redis.Redis(
         host=redis_host,
         port=redis_port,
         password=redis_password
@@ -95,19 +95,19 @@ if __name__ == '__main__':
     partial_handle_new_question_request = partial(
         handle_new_question_request,
         quiz_qa=quiz_qa,
-        redis_base=redis_base,
+        redis_connection=redis_connection,
     )
 
     partial_handle_solution_attempt = partial(
         handle_solution_attempt,
         quiz_qa=quiz_qa,
-        redis_base=redis_base,
+        redis_connection=redis_connection,
     )
 
     partial_handle_give_up = partial(
         handle_give_up,
         quiz_qa=quiz_qa,
-        redis_base=redis_base,
+        redis_connection=redis_connection,
     )
 
     conversation_handler = ConversationHandler(

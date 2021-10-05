@@ -25,11 +25,11 @@ def get_quiz_qa(folder_name):
     quiz_qa = {}
     for paragraph in quiz_raw_data:
         if 'Вопрос' in paragraph:
-            after_colon = paragraph.find(':')+1
-            question = paragraph[after_colon:].strip()
+            index_after_colon = paragraph.find(':') + 1
+            question = paragraph[index_after_colon:].strip()
         if 'Ответ' in paragraph:
-            after_colon = paragraph.find(':') + 1
-            answer = paragraph[after_colon:].strip()
+            index_after_colon = paragraph.find(':') + 1
+            answer = paragraph[index_after_colon:].strip()
             quiz_qa[question] = answer
 
     return quiz_qa
