@@ -16,12 +16,12 @@ from telegram.ext import Filters
 from telegram.ext import MessageHandler
 from telegram.ext import Updater
 
-custom_keyboard = [['Новый вопрос', 'Сдаться'], ['Мой счёт']]
-reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
 QUIZ = Enum('Quiz', 'Question Answer')
 
 
 def start(update, _):
+    custom_keyboard = [['Новый вопрос', 'Сдаться'], ['Мой счёт']]
+    reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
     update.message.reply_text(
         'Привет. Готов к викторине? Начнем!',
         reply_markup=reply_markup
