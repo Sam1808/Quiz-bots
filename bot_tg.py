@@ -114,9 +114,10 @@ if __name__ == '__main__':
         entry_points=[CommandHandler('start', start)],
 
         states={
-            QUIZ.Question: [MessageHandler(
-                Filters.regex('^(Новый вопрос)$'),
-                partial_handle_new_question_request
+            QUIZ.Question: [
+                MessageHandler(
+                    Filters.regex('^(Новый вопрос)$'),
+                    partial_handle_new_question_request
                 )
             ],
 
