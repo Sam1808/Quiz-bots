@@ -39,14 +39,14 @@ def cancel(update, _):
 
 def handle_new_question_request(update, _, quiz_qa, redis_base):
     question = random.choice([*quiz_qa])
-    redis_base.set(update.message.from_user['id'], question)
+    redis_base.set(f"tg-{update.message.from_user['id']}", question)
     update.message.reply_text(f'Вопрос: {question}')
     return QUIZ.Answer
 
 
 def handle_solution_attempt(update, _, quiz_qa, redis_base):
     question_by_user_id = redis_base.get(
-        update.message.from_user['id']
+        f"tg-{update.message.from_user['id']}"
     ).decode('utf-8')
     message = 'Неправильно… Попробуешь ещё раз?'
     if update.message.text.lower() in quiz_qa[question_by_user_id].lower():
@@ -59,7 +59,7 @@ def handle_solution_attempt(update, _, quiz_qa, redis_base):
 
 def handle_give_up(update, context, quiz_qa, redis_base):
     question_by_user_id = redis_base.get(
-        update.message.from_user['id']
+        f"tg-{update.message.from_user['id']}"
     ).decode('utf-8')
     answer = f'Ответ: {quiz_qa[question_by_user_id]}'
     update.message.reply_text(answer)

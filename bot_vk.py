@@ -36,12 +36,12 @@ def send_keyboard(event, vk_api):
 
 def send_new_question(event, vk_api, quiz_qa, redis_base):
     question = random.choice([*quiz_qa])
-    redis_base.set(event.user_id, question)
+    redis_base.set(f'vk-{event.user_id}', question)
     send_message(event, vk_api, message=f'Вопрос: {question}')
 
 
 def check_answer(event, vk_api, quiz_qa, redis_base):
-    question_by_user_id = redis_base.get(event.user_id)
+    question_by_user_id = redis_base.get(f'vk-{event.user_id}')
     if question_by_user_id:
         question_by_user_id = question_by_user_id.decode('utf-8')
         message = 'Неправильно… Попробуешь ещё раз?'
@@ -58,7 +58,7 @@ def check_answer(event, vk_api, quiz_qa, redis_base):
 
 
 def give_up(event, vk_api, quiz_qa, redis_base):
-    question_by_user_id = redis_base.get(event.user_id)
+    question_by_user_id = redis_base.get(f'vk-{event.user_id}')
     if question_by_user_id:
         question_by_user_id = question_by_user_id.decode('utf-8')
         answer = f'Ответ: {quiz_qa[question_by_user_id]}'
