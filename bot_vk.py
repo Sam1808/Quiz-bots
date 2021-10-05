@@ -41,11 +41,11 @@ def send_new_question(event, vk_api, quiz_qa, redis_base):
 
 
 def check_answer(event, vk_api, quiz_qa, redis_base):
-    question_by_user_id = redis_base.get(f'vk-{event.user_id}')
-    if question_by_user_id:
-        question_by_user_id = question_by_user_id.decode('utf-8')
+    quiz_question = redis_base.get(f'vk-{event.user_id}')
+    if quiz_question:
+        quiz_question = quiz_question.decode('utf-8')
         message = 'Неправильно… Попробуешь ещё раз?'
-        if event.text.lower() in quiz_qa[question_by_user_id].lower():
+        if event.text.lower() in quiz_qa[quiz_question].lower():
             message = '''
             Правильно! Поздравляю!
             Для следующего вопроса нажми «Новый вопрос»'''
@@ -58,10 +58,10 @@ def check_answer(event, vk_api, quiz_qa, redis_base):
 
 
 def give_up(event, vk_api, quiz_qa, redis_base):
-    question_by_user_id = redis_base.get(f'vk-{event.user_id}')
-    if question_by_user_id:
-        question_by_user_id = question_by_user_id.decode('utf-8')
-        answer = f'Ответ: {quiz_qa[question_by_user_id]}'
+    quiz_question = redis_base.get(f'vk-{event.user_id}')
+    if quiz_question:
+        quiz_question = quiz_question.decode('utf-8')
+        answer = f'Ответ: {quiz_qa[quiz_question]}'
         send_message(event, vk_api, answer)
         send_new_question(event, vk_api, quiz_qa, redis_base)
 
